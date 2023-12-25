@@ -16,7 +16,7 @@ const int gap = 10;
 
 int row = 0;
 
-string word;
+string word[5];
 int matches[5][5] = {0};
 
 string getRandomWord()
@@ -91,8 +91,9 @@ int main() {
         BeginDrawing();
         ClearBackground(BLACK);
 
-        for (auto i = word.begin(); i != word.end(); i++)
-            DrawText(to_string(*i).c_str(), 60 + (i - word.begin()) * 50, 120, 20, WHITE);
+
+        for (auto i = word[row].begin(); i != word[row].end(); i++)
+            DrawText(to_string(*i).c_str(), 60 + (i - word[row].begin()) * 50, 120, 20, WHITE);
         
        
         genTiles();
@@ -104,11 +105,11 @@ int main() {
             float buttonY = 500;
 
             // Draw button
-            if (GuiButton((Rectangle){ buttonX, buttonY, 50, 50 },  to_string(alphabets[i]).c_str())) {
+            if (GuiButton((Rectangle){ buttonX, buttonY, 40, 40 },  to_string(alphabets[i]).c_str())) {
                 //generate();
-                word.push_back(alphabets[i]);
-                if((word.length() % 5) == 0){
-                    checkWord(targetWord, word, row);
+                word[row].push_back(alphabets[i]);
+                if((word[row].length() % 5) == 0){
+                    checkWord(targetWord, word[row], row);
                     row++;  
                     //word.clear();
                 }
