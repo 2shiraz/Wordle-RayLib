@@ -2,7 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <raylib.h>
-#include "raygui.h" // Include the RayGUI header
+#include "raygui.h" 
 
 using namespace std;
 
@@ -14,6 +14,8 @@ const int tileWidth = 50;
 const int tileHeight = 50;
 const int gap = 10;
 
+int row = 0;
+
 string word;
 int matches[5][5] = {0};
 
@@ -21,8 +23,6 @@ string getRandomWord()
 {
     return "ABCDE";
 }
-
-
 
 void genTiles() {
     for (int i = 0; i < 5; i++) {
@@ -37,11 +37,17 @@ void genTiles() {
     }
 }
 //Simple Algorithm to check Matchness of the word
-int checkWord(string &targerWord, string &word){
+void checkWord(string &targerWord, string &word, int row){
+    int totalMatches = 0;
     for (int i = 0; i < 5; i++) { 
         if(targerWord[i] == word[i]){
-            matches[0][i] = MATCH;
-            cout << "Match" << endl;
+            matches[row][i] = MATCH;
+            totalMatches++;
+            if(totalMatches == 4){
+                cout << "You WON!!";
+                //break;
+            }
+
         }else{
             bool partialMatch = false;
             for(int k = 0; k < 5; k++){
@@ -49,8 +55,7 @@ int checkWord(string &targerWord, string &word){
                     continue;
 
                 if(word[i] == targerWord[k]){   
-                    cout << "Partially Matched" << endl;
-                    matches[0][i] = PARTIAL_MATCH;
+                    matches[row][i] = PARTIAL_MATCH;
                     partialMatch = true;
                     break;
                 }
@@ -58,14 +63,12 @@ int checkWord(string &targerWord, string &word){
             }
             
             if((targerWord[i] != word[i]) && !partialMatch){
-                matches[0][i] = NOT_MATCH;
-                cout << "NO Match" << endl;
+                matches[row][i] = NOT_MATCH;
             }
             
         }
         
     } 
-    return 0;
 }
 void generate(){
     DrawText("A", 10, 10, 20, LIGHTGRAY);
@@ -89,7 +92,7 @@ int main() {
         ClearBackground(BLACK);
 
         for (auto i = word.begin(); i != word.end(); i++)
-            DrawText(&word[i], 60 + (i - word.begin()) * 50, 120, 20, WHITE);
+            DrawText(to_string(*i).c_str(), 60 + (i - word.begin()) * 50, 120, 20, WHITE);
         
        
         genTiles();
@@ -101,11 +104,13 @@ int main() {
             float buttonY = 500;
 
             // Draw button
-            if (GuiButton((Rectangle){ buttonX, buttonY, 50, 60 },  to_string(alphabets[i]).c_str())) {
+            if (GuiButton((Rectangle){ buttonX, buttonY, 50, 50 },  to_string(alphabets[i]).c_str())) {
                 //generate();
                 word.push_back(alphabets[i]);
-                if(word.length() > 4){
-                    int a = checkWord(targetWord, word);  
+                if((word.length() % 5) == 0){
+                    checkWord(targetWord, word, row);
+                    row++;  
+                    //word.clear();
                 }
                 
                 cout << "Button " << alphabets[i] << " clicked!" << endl;
