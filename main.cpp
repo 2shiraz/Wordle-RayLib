@@ -17,8 +17,12 @@ const int tileWidth = 65;
 const int tileHeight = 65;
 const int gap = 10;
 const int tileLeftPadding = 160;
+const int tileTopPadding = 150;
+
+int gameStatus = 0;
 
 int row = 0;
+
 
 string word[5];
 int matches[5][5] = {0};  
@@ -28,28 +32,29 @@ string getRandomWord()
     return "EVOKE";
 }
 
+
+string targetWord = getRandomWord();
+
 void genTiles() {
     for (int i = 0; i < 5; i++) {
         for (int j = 0; j < 5; j++) {
             string character = string(1, word[j][i]);
             
-            DrawText(character.c_str(), tileLeftPadding + 30 + i * (tileWidth + gap), 120 + j * (tileHeight + gap), 25, WHITE);
+            DrawText(character.c_str(), tileLeftPadding + 25 + i * (tileWidth + gap), tileTopPadding + 20 + j * (tileHeight + gap), 25, WHITE);
 
             if(matches[j][i] == MATCH){
-                DrawRectangleLines(tileLeftPadding + i * (tileWidth + gap), 100 + j * (tileHeight + gap), tileWidth, tileHeight, GREEN);
+                DrawRectangleLines(tileLeftPadding + i * (tileWidth + gap), tileTopPadding + j * (tileHeight + gap), tileWidth, tileHeight, GREEN);
             }
                 
             else if(matches[j][i] == PARTIAL_MATCH)
-                DrawRectangleLines(tileLeftPadding + i * (tileWidth + gap), 100 + j * (tileHeight + gap), tileWidth, tileHeight, YELLOW);
+                DrawRectangleLines(tileLeftPadding + i * (tileWidth + gap), tileTopPadding + j * (tileHeight + gap), tileWidth, tileHeight, YELLOW);
             else
-                DrawRectangleLines(tileLeftPadding + i * (tileWidth + gap), 100 + j * (tileHeight + gap), tileWidth, tileHeight, GRAY);
+                DrawRectangleLines(tileLeftPadding + i * (tileWidth + gap), tileTopPadding + j * (tileHeight + gap), tileWidth, tileHeight, WHITE);
         }
     }
 }
-void won(){
 
-}
-//Simple Algorithm to check Matchness of the word
+//Simple Algorithm to check correctness of the word
 void checkWord(string &targerWord, string &word, int row){
     int totalMatches = 0;
     for (int i = 0; i < 5; i++) { 
@@ -57,8 +62,7 @@ void checkWord(string &targerWord, string &word, int row){
             matches[row][i] = MATCH;
             totalMatches++;
             if(totalMatches > 4){
-                cout << "You WON!!";
-                //break;
+                gameStatus = 1;
             }
 
         }else{
@@ -79,52 +83,88 @@ void checkWord(string &targerWord, string &word, int row){
         }
     } 
 }
+void resetGame() {
+    for (int i = 0; i < 5; i++) {
+        word[i].clear();  
+        for (int j = 0; j < 5; j++) {
+            matches[i][j] = 0;
+        }
+    }
+    row = 0;
+    gameStatus = 0;
+}
+
+void overlay() {
+    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), GRAY);
+    if (gameStatus == 1) {
+        DrawText("YOU WIN!", 220, 400, 55, BLACK);
+    } else if (gameStatus == 2) {
+        DrawText("YOU LOST!", 220, 400, 55, RED);
+    }
+
+    if (GuiButton((Rectangle){220, 500, 200, 50}, "PLAY AGAIN")) {
+        resetGame();
+        targetWord = getRandomWord();
+    }
+}
 
 int main() {
-    string targetWord = getRandomWord();
 
     InitWindow(screenWidth, screenHeight, "Wordle Game");
     SetTargetFPS(60);
 
-    // Define an array of alphabets
     char alphabets[] = "QWERTYUIOPASDFGHJKLZXCVBNM";
 
     while (WindowShouldClose() == false) {
-
-
-        //Draw
+        // Draw
         BeginDrawing();
         ClearBackground(BLACK);
+        if(gameStatus){
+            overlay();
+        }else if(row == 5){
+            gameStatus = 2;
+            overlay();
+        }else{
 
-        genTiles();
-        //Displaying the Keyboard and hadling the onClick for the keys
-        for (int i = 0; i < 26; i++) {
-            
-            float buttonX = 50 + i * 60;
-            float buttonY = 500;
+        
+            DrawText("WORDLE!", 220, 30, 55, WHITE);
 
-            if(i > 9){
-                buttonX = 80 + (i-10) * 60;
-                buttonY = buttonY + 60;
-                if(i > 18){
-                    buttonX = 140 + (i-19) * 60;
+            genTiles();
+
+            // Displaying the Keyboard and handling the onClick for the keys
+            for (int i = 0; i < 26; i++) {
+                float buttonX = 50 + i * 60;
+                float buttonY = 600;
+
+                if (i > 9) {
+                    buttonX = 80 + (i - 10) * 60;
                     buttonY = buttonY + 60;
+                    if (i > 18) {
+                        buttonX = 140 + (i - 19) * 60;
+                        buttonY = buttonY + 60;
+                    }
+                }
+
+                // Draw button
+                if (GuiButton((Rectangle){ buttonX, buttonY, 60, 60 }, string(1, alphabets[i]).c_str())) {
+                    word[row].push_back(alphabets[i]);
+                    if ((word[row].length() % 5) == 0) {
+                        checkWord(targetWord, word[row], row);
+                        row++;
+                    }
                 }
             }
-            // Draw button
-            if (GuiButton((Rectangle){ buttonX, buttonY, 60, 60 }, string(1, alphabets[i]).c_str())) {
-                word[row].push_back(alphabets[i]);
-                if((word[row].length() % 5) == 0){
-                    checkWord(targetWord, word[row], row);
-                    row++;  
-                }
-                //cout << "Button " << alphabets[i] << " clicked!" << endl;
+
+            // Del Button
+            if (GuiButton((Rectangle){ 560, 720, 60, 60 }, "Del") && !word[row].empty()) {
+                word[row].pop_back();
             }
         }
-
         EndDrawing();
+        
     }
 
     CloseWindow();
     return 0;
 }
+
