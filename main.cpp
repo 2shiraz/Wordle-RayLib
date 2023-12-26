@@ -5,7 +5,7 @@
 #include "raygui.h" 
 
 using namespace std;
-
+//Setting all the constants 
 const int screenWidth = 700;
 const int screenHeight = 800;
 
@@ -18,8 +18,11 @@ const int tileHeight = 65;
 const int gap = 10;
 const int tileLeftPadding = 160;
 const int tileTopPadding = 150;
-
-int gameStatus = 0;
+//Setting gameState
+// gameState = 0 = Initial state
+// gameState = 1 = winning state
+// gameState = 2 = losing state
+int gameState = 0;
 
 int row = 0;
 
@@ -45,6 +48,7 @@ string getRandomWord()
 
 string targetWord = getRandomWord();
 
+//Generate Tiles and update text ( from word array ) for every tick ( 60fps )
 void genTiles() {
     for (int i = 0; i < 5; i++) {
         for (int j = 0; j < 5; j++) {
@@ -73,7 +77,7 @@ void checkWord(string &targerWord, string &word, int row){
             totalMatches++;
             //To check if user have won
             if(totalMatches > 4){
-                gameStatus = 1;
+                gameState = 1;
             }
 
         }else{
@@ -98,26 +102,27 @@ void checkWord(string &targerWord, string &word, int row){
 void resetGame() {
     for (int i = 0; i < 5; i++) {
         word[i].clear();
-        //delete[] word;
         for (int j = 0; j < 5; j++) {
             matches[j][i] = 0;
         }
     }
 
     row = 0;
-    gameStatus = 0;
+    gameState = 0;
 }
 
 void overlay() {
     DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), GRAY);
-    if (gameStatus == 1) {
+    // Checking the game status to display the revelant overlay ( i.e win/lose screen )
+    if (gameState == 1) {
         DrawText("YOU WIN!", 220, 400, 55, GREEN);
-    } else if (gameStatus == 2) {
+    } else if (gameState == 2) {
         DrawText("YOU LOST", 200, 400, 55, RED);
         string message = "The word was " + targetWord;
         DrawText(message.c_str(), 210, 470, 25, BLACK);
     }
-
+    //Handling onClick for PlayAgain Btn. If Clicked call resetGame func with setting a new
+    // random word to start
     if (GuiButton((Rectangle){235, 500, 200, 50}, "PLAY AGAIN")) {
         resetGame();
         targetWord = getRandomWord();
@@ -128,17 +133,17 @@ int main() {
 
     InitWindow(screenWidth, screenHeight, "Wordle Game");
     SetTargetFPS(60);
-
+    //QWERTY Layout keyboard array
     char alphabets[] = "QWERTYUIOPASDFGHJKLZXCVBNM";
 
     while (WindowShouldClose() == false) {
         // Draw
         BeginDrawing();
         ClearBackground(BLACK);
-        if(gameStatus == 1){
+        if(gameState == 1){
             overlay();
         }else if(row == 5){
-            gameStatus = 2;
+            gameState = 2;
             overlay();
         }else{
 
@@ -171,7 +176,7 @@ int main() {
                 }
             }
 
-            // Del Button
+            // Delete Button to remove last character from the current row of word array
             if (GuiButton((Rectangle){ 560, 720, 60, 60 }, "Del") && !word[row].empty()) {
                 word[row].pop_back();
                 for (int i = 0; i < 5; i++) {
