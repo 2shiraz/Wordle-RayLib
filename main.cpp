@@ -29,7 +29,17 @@ int matches[5][5] = {0};
 
 string getRandomWord()
 {
-    return "EVOKE";
+    // Array of common 5-letter words
+    const string commonWords[] = {
+        "APPLE", "TABLE", "HOUSE", "HAPPY", "MUSIC", "OCEAN", "CLOUD", "PIANO", "CHAIR", "KNIFE"
+    };
+
+    const int numWords = sizeof(commonWords) / sizeof(commonWords[0]);
+    srand((int)(time(nullptr)));
+    int randomIndex = rand() % numWords;
+    string randWord = commonWords[randomIndex];
+    cout << randWord;
+    return randWord;
 }
 
 
@@ -54,13 +64,14 @@ void genTiles() {
     }
 }
 
-//Simple Algorithm to check correctness of the word
+//To check correctness of the word
 void checkWord(string &targerWord, string &word, int row){
     int totalMatches = 0;
     for (int i = 0; i < 5; i++) { 
         if(word[i] == targerWord[i]){
             matches[row][i] = MATCH;
             totalMatches++;
+            //To check if user have won
             if(totalMatches > 4){
                 gameStatus = 1;
             }
@@ -83,13 +94,16 @@ void checkWord(string &targerWord, string &word, int row){
         }
     } 
 }
+//Reset the Game to Default stats
 void resetGame() {
     for (int i = 0; i < 5; i++) {
-        word[i].clear();  
+        word[i].clear();
+        //delete[] word;
         for (int j = 0; j < 5; j++) {
-            matches[i][j] = 0;
+            matches[j][i] = 0;
         }
     }
+
     row = 0;
     gameStatus = 0;
 }
@@ -97,12 +111,14 @@ void resetGame() {
 void overlay() {
     DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), GRAY);
     if (gameStatus == 1) {
-        DrawText("YOU WIN!", 220, 400, 55, BLACK);
+        DrawText("YOU WIN!", 220, 400, 55, GREEN);
     } else if (gameStatus == 2) {
-        DrawText("YOU LOST!", 220, 400, 55, RED);
+        DrawText("YOU LOST", 200, 400, 55, RED);
+        string message = "The word was " + targetWord;
+        DrawText(message.c_str(), 210, 470, 25, BLACK);
     }
 
-    if (GuiButton((Rectangle){220, 500, 200, 50}, "PLAY AGAIN")) {
+    if (GuiButton((Rectangle){235, 500, 200, 50}, "PLAY AGAIN")) {
         resetGame();
         targetWord = getRandomWord();
     }
@@ -119,7 +135,7 @@ int main() {
         // Draw
         BeginDrawing();
         ClearBackground(BLACK);
-        if(gameStatus){
+        if(gameStatus == 1){
             overlay();
         }else if(row == 5){
             gameStatus = 2;
@@ -158,6 +174,9 @@ int main() {
             // Del Button
             if (GuiButton((Rectangle){ 560, 720, 60, 60 }, "Del") && !word[row].empty()) {
                 word[row].pop_back();
+                for (int i = 0; i < 5; i++) {
+                    cout << word[i] << endl;
+                }
             }
         }
         EndDrawing();
