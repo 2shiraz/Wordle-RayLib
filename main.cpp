@@ -34,8 +34,17 @@ string getRandomWord()
 {
     // Array of common 5-letter words
     const string commonWords[] = {
-        "APPLE", "TABLE", "HOUSE", "HAPPY", "MUSIC", "OCEAN", "CLOUD", "PIANO", "CHAIR", "KNIFE"
-    };
+    "APPLE", "TABLE", "HOUSE", "HAPPY", "MUSIC", "OCEAN", "CLOUD", "PIANO", "CHAIR", "KNIFE",
+    "BEACH", "LUNCH", "SMILE", "PLATE", "LIGHT", "GHOST", "SLEEP", "WATER", "SMOKE", "CLOCK",
+    "SWEET", "CANDY", "BREAD", "SHIRT", "GLOVE", "POWER", "FLOOR", "SUNNY", "FLAME", "GRASS",
+    "SILKY", "DREAM", "JUICE", "MILKY", "HONEY", "FROST", "CHESS", "BRICK", "PAPER", "STONE",
+    "VOICE", "ROBOT", "STORM", "BEARD", "LEMON", "CHALK", "PLUMB", "GREEN", "WOMAN", "SKIRT",
+    "STARS", "ROSEY", "CLEAN", "GLASS", "BROKE", "WHITE", "BLACK", "BROWN", "QUEEN", "KING",
+    "MANGO", "PLUMB", "SNAKE", "BENCH", "CHAOS", "LAUGH", "GRAND", "TRUCK", "WORLD", "MAGIC",
+    "QUIRK", "FLUTE", "BLADE", "DRINK", "WOMEN", "FROGS", "DAISY", "WINDY", "JOKER", "TIGER",
+    "RIVER", "RAINY", "BANDY", "PIXEL", "HYDRO", "MARCH", "JUMPY", "LIVID", "VIBES", "MURAL",
+    "ZEBRA", "FABLE", "SNAZY", "BOXER", "RUMOR", "CAMEL", "POUND", "VIVID", "JIFFY", "FUNKY"
+};
 
     const int numWords = sizeof(commonWords) / sizeof(commonWords[0]);
     srand((int)(time(nullptr)));
@@ -52,21 +61,25 @@ string targetWord = getRandomWord();
 void genTiles() {
     for (int i = 0; i < 5; i++) {
         for (int j = 0; j < 5; j++) {
-            string character = string(1, word[j][i]);
-            
+            string character = "";
+
+            if (i < word[j].length()) {
+                character = string(1, word[j][i]);
+            }
+
             DrawText(character.c_str(), tileLeftPadding + 25 + i * (tileWidth + gap), tileTopPadding + 20 + j * (tileHeight + gap), 25, WHITE);
 
-            if(matches[j][i] == MATCH){
+            if (matches[j][i] == MATCH) {
                 DrawRectangleLines(tileLeftPadding + i * (tileWidth + gap), tileTopPadding + j * (tileHeight + gap), tileWidth, tileHeight, GREEN);
-            }
-                
-            else if(matches[j][i] == PARTIAL_MATCH)
+            } else if (matches[j][i] == PARTIAL_MATCH) {
                 DrawRectangleLines(tileLeftPadding + i * (tileWidth + gap), tileTopPadding + j * (tileHeight + gap), tileWidth, tileHeight, YELLOW);
-            else
+            } else {
                 DrawRectangleLines(tileLeftPadding + i * (tileWidth + gap), tileTopPadding + j * (tileHeight + gap), tileWidth, tileHeight, WHITE);
+            }
         }
     }
 }
+
 
 //To check correctness of the word
 void checkWord(string &targerWord, string &word, int row){
@@ -179,9 +192,6 @@ int main() {
             // Delete Button to remove last character from the current row of word array
             if (GuiButton((Rectangle){ 560, 720, 60, 60 }, "Del") && !word[row].empty()) {
                 word[row].pop_back();
-                for (int i = 0; i < 5; i++) {
-                    cout << word[i] << endl;
-                }
             }
         }
         EndDrawing();
