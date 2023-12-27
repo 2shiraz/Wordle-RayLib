@@ -1,2 +1,3 @@
 # Wordle-RayLib
- Wordle Game using Raylib 
+
+ Wordle Game clone using Raylib 
